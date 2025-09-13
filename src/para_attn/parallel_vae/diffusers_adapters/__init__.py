@@ -11,6 +11,8 @@ def parallelize_vae(vae, *args, **kwargs) -> None:
         adapter_name = "autoencoder_kl_hunyuan_video"
     elif vae_cls_name == "AutoencoderKLWan":
         adapter_name = "autoencoder_kl_wan"
+    elif vae_cls_name == "AutoencoderKLQwenImage":
+        adapter_name = "autoencoder_kl_qwenimage"
     else:
         raise ValueError(f"Unknown vae class name: {vae_cls_name}")
 

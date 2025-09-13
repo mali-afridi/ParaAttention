@@ -98,6 +98,7 @@ def ulysses_attn_func(
     scale=None,
     mesh=None,
     attn_func=None,
+    enable_gqa=False
 ):
     assert query.ndim == 4, "query must have 4 dimensions, got {}".format(query.ndim)
     assert key.ndim == 4, "key must have 4 dimensions, got {}".format(key.ndim)
@@ -113,7 +114,7 @@ def ulysses_attn_func(
     if attn_func is None:
         attn_func = F.scaled_dot_product_attention
 
-    out = attn_func(query, key, value, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, scale=scale)
+    out = attn_func(query, key, value, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, scale=scale, enable_gqa=enable_gqa)
 
     out = _sdpa_output_all_to_all(out, mesh)
     return out
@@ -211,6 +212,7 @@ def ring_attn_func(
     *,
     scale=None,
     mesh=None,
+    enable_gqa=False
 ):
     pg = DP.get_group(mesh)
     world_size = DP.get_world_size(pg)
@@ -223,6 +225,7 @@ def ring_attn_func(
             dropout_p=dropout_p,
             is_causal=is_causal,
             scale=scale,
+            enable_gqa=enable_gqa
         )
 
     assert attn_mask is None, "attn_mask is not supported in ring_attn_func when world_size > 1"
@@ -248,6 +251,7 @@ def in_batch_attn_func(
     is_causal=False,
     *,
     scale=None,
+    enable_gqa=False
 ):
     assert query.ndim == 4, "query must have 4 dimensions, got {}".format(query.ndim)
     assert key.ndim == 4, "key must have 4 dimensions, got {}".format(key.ndim)
@@ -270,6 +274,7 @@ def in_batch_attn_func(
         dropout_p=dropout_p,
         is_causal=is_causal,
         scale=scale,
+        enable_gqa=enable_gqa
     )
 
     out = out.reshape(h, b, s_q, -1).permute(1, 0, 2, 3)
